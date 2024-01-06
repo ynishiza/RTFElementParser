@@ -1,0 +1,10 @@
+# GHC 9.4.7
+resolver: lts-21.17
+
+packages:
+- .
+
+# Enable when using colonnade
+allow-newer: true
+
+extra-deps: []

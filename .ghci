@@ -1,0 +1,26 @@
+-- 
+:set 
+:set -w          
+:set -W           
+:set -XMagicHash
+:set -XNoStarIsType
+:set -fprint-explicit-foralls
+:set prompt "ghci> "
+:set editor "nvim"
+:set +m             
+:set +s            
+:set +t
+
+import Language.Haskell.TH
+import Text.Megaparsec hiding (parse)
+import Text.Megaparsec qualified as M 
+import Text.Megaparsec.Char 
+import Text.Megaparsec.Char.Lexer qualified as M
+-- import Data.Attoparsec.ByteString.Char8 as P
+import Data.ByteString.Char8 qualified as B
+import Data.Text qualified as T
+import Data.Text.IO qualified as T
+import Data.Text.Encoding
+import System.Environment
+import Hedgehog
+import Test.Hspec
