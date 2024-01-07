@@ -13,6 +13,7 @@ import RTF.Parse (Parser, parseRTFElements)
 import RTF.Types
 import RTF.Utils
 import Test.Hspec hiding (runIO)
+import TestUtils
 import Text.Megaparsec
 
 data ContentParseResult a
@@ -21,21 +22,12 @@ data ContentParseResult a
   | Success a
   deriving (Eq, Show)
 
-parseDoc_ :: ElementParser c -> Text -> ContentParseResult c
-parseDoc_ p d = case runParser parseRTFElements "RTFElement" d of
-  Left e -> FileParseError e
-  Right contents -> case runParser p "" contents of
-    Left e -> ContentParseError e
-    Right value -> Success value
-
 spec :: Spec
 spec = describe "RTF Parsers" $ do
   let testError :: (HasCallStack) => ElementParser c -> Text -> Text -> Expectation
-      testError p b expected = case parseDoc_ p b of
-        ContentParseError e -> do
-          T.strip (T.pack $ errorBundlePretty e) `shouldBe` T.strip expected
-        FileParseError e -> do
-          T.strip (T.pack $ errorBundlePretty e) `shouldBe` T.strip expected
+      testError p b expected = case runElementParser p b of
+        Left message -> do
+          T.strip (T.pack message) `shouldBe` T.strip expected
         _ -> expectationFailure $ "Failed to test: " <> T.unpack expected
 
   specConvert

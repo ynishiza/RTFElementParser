@@ -25,6 +25,9 @@ module RTF.Types (
   charReserved,
   charNewline,
   charOptionalDestination,
+  isWordWithSpaceSuffix,
+  isWordWithNoSuffix,
+  isWordWithStartPrefix,
 ) where
 
 import Data.Word
@@ -68,6 +71,18 @@ data RTFControlPrefix = StarPrefix | NoPrefix
 data RTFControlSuffix = RTFControlParam Int | SpaceSuffix | NoSuffix
   deriving stock (Eq, Show, Generic)
 
+isWordWithStartPrefix :: RTFElement -> Bool
+isWordWithStartPrefix (RTFControlWord StarPrefix _ _) = True
+isWordWithStartPrefix _ = False
+
+isWordWithNoSuffix :: RTFElement -> Bool
+isWordWithNoSuffix (RTFControlWord _ _ NoSuffix) = True
+isWordWithNoSuffix _ = False
+
+isWordWithSpaceSuffix :: RTFElement -> Bool
+isWordWithSpaceSuffix (RTFControlWord _ _ SpaceSuffix) = True
+isWordWithSpaceSuffix _ = False
+
 getRtfControlSymbol :: RTFElement -> Maybe Char
 getRtfControlSymbol (RTFControlSymbol s) = Just s
 getRtfControlSymbol _ = Nothing
@@ -81,8 +96,25 @@ rtfControlSymbol c
   RTF specs in the README
 -}
 data RTFElement
-  = RTFControlSymbol Char
-  | RTFControlWord RTFControlPrefix Text RTFControlSuffix
+  = -- |
+    -- 
+    -- Important symbols
+    -- @
+    --  \\\\        escaped slash
+    --  \\\\n       literal new line. New lines in RTF are ignored otherwise.
+    --  \\{         escaped brackets i.e. not a group
+    --  \\}
+    -- @
+    RTFControlSymbol Char
+  | -- |
+    --
+    -- e.g.
+    -- @
+    --  \\froman                 no prefix nor suffix
+    --  \\red0                   param suffix
+    --  \\*\\expandedcolors       star prefix
+    -- @
+    RTFControlWord RTFControlPrefix Text RTFControlSuffix
   | RTFGroup [RTFElement]
   | RTFText Text
   deriving stock (Eq, Show, Generic)

@@ -90,6 +90,8 @@ test-suite main-test
   type: exitcode-stdio-1.0
   main-is: Main.hs
   other-modules:
+      Gen
+      Properties
       RTF.ElementParser
       RTF.Parse
       RTF.ParserUtils
@@ -97,6 +99,7 @@ test-suite main-test
       RTF.Types
       RTF.Utils
       Spec
+      TestUtils
       Paths_rtfelementparser
   hs-source-dirs:
       ./test
