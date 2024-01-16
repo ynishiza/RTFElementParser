@@ -1,24 +1,19 @@
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+
+{-# HLINT ignore "Use record patterns" #-}
+
 {- |
   See README for references
 -}
 module RTF.Types (
   rtfControlSymbol,
   getRtfControlSymbol,
-  _SpaceSuffix,
-  _RTFControlParam,
-  _NoSuffix,
   --
   RTFElement (..),
   Word8,
   Text,
   RTFControlPrefix (..),
   RTFControlSuffix (..),
-  -- Lens
-  _RTFControlWord,
-  _RTFControlSymbol,
-  _RTFGroup,
-  _RTFText,
-  --
   charControl,
   charExtendedControlName,
   charSymbol,
@@ -28,6 +23,10 @@ module RTF.Types (
   isWordWithSpaceSuffix,
   isWordWithNoSuffix,
   isWordWithStartPrefix,
+  isRTFControlWord,
+  isRTFText,
+  isRTFControlSymbol,
+  isRTFGroup,
 ) where
 
 import Data.Word
@@ -97,7 +96,7 @@ rtfControlSymbol c
 -}
 data RTFElement
   = -- |
-    -- 
+    --
     -- Important symbols
     -- @
     --  \\\\        escaped slash
@@ -119,5 +118,18 @@ data RTFElement
   | RTFText Text
   deriving stock (Eq, Show, Generic)
 
-$(makePrisms ''RTFElement)
-$(makePrisms ''RTFControlSuffix)
+isRTFControlSymbol :: RTFElement -> Bool
+isRTFControlSymbol (RTFControlSymbol _) = True
+isRTFControlSymbol _ = False
+
+isRTFControlWord :: RTFElement -> Bool
+isRTFControlWord (RTFControlWord _ _ _) = True
+isRTFControlWord _ = False
+
+isRTFGroup :: RTFElement -> Bool
+isRTFGroup (RTFGroup _) = True
+isRTFGroup _ = False
+
+isRTFText :: RTFElement -> Bool
+isRTFText (RTFText _) = True
+isRTFText _ = False

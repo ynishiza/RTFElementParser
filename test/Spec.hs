@@ -11,7 +11,6 @@ import Data.Void
 import RTF.ElementParser
 import RTF.Parse (Parser, parseRTFElements)
 import RTF.Types
-import RTF.Utils
 import Test.Hspec hiding (runIO)
 import TestUtils
 import Text.Megaparsec

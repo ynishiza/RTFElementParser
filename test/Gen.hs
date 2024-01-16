@@ -41,10 +41,10 @@ rtfSymbol =
  where
   symbol = Prelude.filter (not . (`elem` nonSymboChars)) $ toEnum <$> [0 .. 127]
   commonSymbols = "{}\\\n\t"
-  nonSymboChars = nameChars <> ['*'] <> commonSymbols <> ['0'..'9']
+  nonSymboChars = nameChars <> ['*'] <> commonSymbols <> ['0' .. '9']
 
 nameChars :: String
-nameChars = ['a' .. 'z'] ++ ['A' .. 'Z'] 
+nameChars = ['a' .. 'z'] ++ ['A' .. 'Z']
 
 rtfGroup :: Gen String
 rtfGroup = recursive ((surround . join <$>) . sequence) (replicate 10 nonGroup) [rtfGroup]

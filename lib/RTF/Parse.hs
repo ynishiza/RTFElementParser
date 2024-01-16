@@ -58,7 +58,6 @@ parseRTFElement =
  where
   symbol =
     ( do
-        -- Note: Backtrack
         c <- parseControl $ satisfy (notInClass charExtendedControlName)
         o <- getOffset
         case rtfControlSymbol c of
@@ -69,8 +68,7 @@ parseRTFElement =
     )
       <?> "RTFControlSymbol"
   wordName =
-    takeWhile1P (Just "name character") (inClass charExtendedControlName)
-      <?> "RTFControlWord"
+    takeWhile1P (Just "RTFControlWord name") (inClass charExtendedControlName)
   group =
     RTFGroup
       <$> parseRTFGroupWith parseRTFElements
@@ -102,10 +100,10 @@ parseRTFControlWordBase name =
       case prefixPart of
         -- case: with prefix
         -- A prefix must be followed by a name so no backtrack.
-        Just x -> RTFControlWord x <$> wordName
+        Just x -> RTFControlWord x <$> (char charControl *> name <?> "RTFControlWord name")
         -- case: without prefix
-        -- If the parser fails,
-        Nothing -> RTFControlWord NoPrefix <$> wordName
+        -- Must begin with a name so no backtrack.
+        Nothing -> RTFControlWord NoPrefix <$> (parseControl name <?> "RTFControlWord name")
   )
     <*> ( trailingSpace
             <|> (RTFControlParam <$> decimal <?> "RTFControlParam")
@@ -117,7 +115,6 @@ parseRTFControlWordBase name =
   prefix =
     (parseControl (char '*') *> return StarPrefix)
       <?> "RTFControlPrefix"
-  wordName = parseControl name <?> "RTFControlWord name"
   trailingSpace =
     char ' '
       >> return SpaceSuffix

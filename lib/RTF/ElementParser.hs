@@ -18,7 +18,7 @@ module RTF.ElementParser (
   rtfGroup,
 ) where
 
-import Control.Lens
+import Control.Monad.Identity (Identity)
 import Data.List (intercalate)
 import Data.List.NonEmpty qualified as N
 import Data.Set qualified as S
@@ -109,7 +109,7 @@ rtfSymbol_ symbol = rtfSymbol (\x -> if x == symbol then Right symbol else Left 
 
 rtfSymbol :: (Char -> Either (ErrorItem RTFElement) c) -> ElementParser c
 rtfSymbol f = try $ do
-  x@(RTFControlSymbol c) <- satisfyWith "RTFControlSymbol" (has _RTFControlSymbol)
+  x@(RTFControlSymbol c) <- satisfyWith "RTFControlSymbol" isRTFControlSymbol
   valueOrError x (f c)
 
 rtfControlWordValue_ :: Text -> (Int -> c) -> ElementParser c
@@ -133,7 +133,7 @@ rtfControlWordLabel f = rtfControlWord f'
 
 rtfControlWord :: (RTFControlPrefix -> Text -> RTFControlSuffix -> Either (ErrorItem RTFElement) c) -> ElementParser c
 rtfControlWord f = try $ do
-  x@(RTFControlWord prefix n suffix) <- satisfyWith "RTFControlWord" (has _RTFControlWord)
+  x@(RTFControlWord prefix n suffix) <- satisfyWith "RTFControlWord" isRTFControlWord
   valueOrError x (f prefix n suffix)
 
 rtfText_ :: Text -> ElementParser Text
@@ -141,12 +141,12 @@ rtfText_ text = rtfText (\x -> if x == text then Right text else Left (errorToke
 
 rtfText :: (Text -> Either (ErrorItem RTFElement) Text) -> ElementParser Text
 rtfText f = try $ do
-  x@(RTFText t) <- satisfyWith "RTFText" (has _RTFText)
+  x@(RTFText t) <- satisfyWith "RTFText" isRTFText
   valueOrError x (f t)
 
 rtfGroup :: Text -> ElementParser c -> ElementParser c
 rtfGroup msg p = try $ do
-  (RTFGroup g) <- satisfyWith "RTFGroup" (has _RTFGroup)
+  (RTFGroup g) <- satisfyWith "RTFGroup" isRTFGroup
   offset <- getOffset
   case runParser (p <* eof) (T.unpack msg) g of
     Left e -> parseError $ FancyError (offset - 1) $ S.singleton $ ErrorCustom $ RTFGroupError offset (RTFGroup g) e
